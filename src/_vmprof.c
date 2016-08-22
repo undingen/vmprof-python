@@ -36,12 +36,13 @@ static volatile int is_enabled = 0;
 static destructor Original_code_dealloc = 0;
 static ptrdiff_t mainloop_sp_offset;
 
+/*
 static void* get_virtual_ip(char* sp)
 {
     PyFrameObject *f = *(PyFrameObject **)(sp + mainloop_sp_offset);
     return (void *)CODE_ADDR_TO_UID(f->f_code);
 }
-
+*/
 static int emit_code_object(PyCodeObject *co)
 {
     char buf[MAX_FUNC_NAME + 1];
@@ -56,10 +57,10 @@ static int emit_code_object(PyCodeObject *co)
     if (co_filename == NULL)
         return -1;
 #else
-    co_name = PyString_AS_STRING(co->co_name);
-    co_filename = PyString_AS_STRING(co->co_filename);
+    co_name = PyString_AS_STRING(PyCode_GetName(co));
+    co_filename = PyString_AS_STRING(PyCode_GetFilename(co));
 #endif
-    co_firstlineno = co->co_firstlineno;
+    co_firstlineno = 1;//co->co_firstlineno;
 
     sz = snprintf(buf, MAX_FUNC_NAME / 2, "py:%s", co_name);
     if (sz < 0) sz = 0;
@@ -84,6 +85,7 @@ static int _look_for_code_object(PyObject *o, void *all_codes)
            objects are not created as GC-aware in CPython, so we need
            to hack like this to hope to find most of them. 
         */
+        /*
         i = PyTuple_Size(co->co_consts);
         while (i > 0) {
             --i;
@@ -91,6 +93,7 @@ static int _look_for_code_object(PyObject *o, void *all_codes)
                                       all_codes) < 0)
                 return -1;
         }
+        */
     }
     return 0;
 }

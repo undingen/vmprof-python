@@ -68,8 +68,9 @@ static int read_trace_from_cpy_frame(PyFrameObject *frame, void **result, int ma
 {
     int depth = 0;
 
-    while (frame && depth < max_depth) {
+    while (frame && depth < max_depth && frame != Py_None) {
         if (profile_lines) {
+#if 0
             // In the line profiling mode we save a line number for every frame.
             // Actual line number isn't stored in the frame directly (f_lineno points to the
             // beginning of the frame), so we need to compute it from f_lasti and f_code->co_lnotab.
@@ -98,10 +99,13 @@ static int read_trace_from_cpy_frame(PyFrameObject *frame, void **result, int ma
             } else {
                 result[depth++] = (void*) 0;
             }
+#else
+            assert(0);
+#endif
         }
 
-        result[depth++] = (void*)CODE_ADDR_TO_UID(frame->f_code);
-        frame = frame->f_back;
+        result[depth++] = (void*)CODE_ADDR_TO_UID(PyFrame_GetCode(frame));
+        frame = (PyFrameObject*)PyFrame_GetBack(frame);
     }
     return depth;
 }

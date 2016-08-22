@@ -104,8 +104,8 @@ static int get_stack_trace(void** result, int max_depth, ucontext_t *ucontext)
 
     if (!current)
         return 0;
-    PyFrameObject *frame = current->frame;
-    return read_trace_from_cpy_frame(current->frame, result, max_depth);
+    PyFrameObject *frame = PyFrame_ForStackLevel(0);
+    return read_trace_from_cpy_frame(frame, result, max_depth);
 }
 
 static void *get_current_thread_id(void)
